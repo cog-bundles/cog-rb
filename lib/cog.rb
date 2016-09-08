@@ -2,7 +2,6 @@
 require_relative 'cog/bundle'
 require_relative 'cog/config'
 require_relative 'cog/command'
-require_relative 'cog/subcommand'
 require_relative 'cog/aggregate_command'
 require_relative 'cog/request'
 require_relative 'cog/response'
