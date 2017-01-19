@@ -9,7 +9,7 @@ class Cog
     end
 
     def create_bundle_module
-      module_name = @name.capitalize
+      module_name = classify(@name)
 
       Object.const_set('CogCmd', Module.new) unless Object.const_defined?('CogCmd')
 
@@ -29,11 +29,7 @@ class Cog
       require File.join(@base_dir, 'lib', 'cog_cmd', @name, *command_path)
 
       # translate snake-case command names to camel case
-      command_class = command_name.gsub(/(\A|_)([a-z])/) { $2.upcase }
-
-      # convert hyphenated command names into class hierarchies,
-      # e.g. template-list becomes Template::List.
-      command_class = command_class.split('-').map{ |seg| seg.capitalize }.join('::')
+      command_class = classify(command_name)
 
       @module.const_get(command_class).new
     end
@@ -53,5 +49,20 @@ class Cog
       response.send
     end
 
+    private
+
+    # Converts strings to UpperCamelCase.
+    # Also converts '/' and '-' to '::' for converting paths to namespaces
+
+    # Examples:
+    #   camelize('cog_cmd')        # => CogCmd
+    #   camelize('cog_cmd/my_bundle') # => CogCmd::MyBundle
+    #   camelize('cog_cmd-my_bundle') # => CogCmd::MyBundle
+    def classify(term)
+      term
+        .sub(/^[a-z\d]*/, &:capitalize)
+        .gsub(%r{(?:_|(/|\-))([a-z\d]*)}) { "#{$1}#{$2.capitalize}" }
+        .gsub(%r{/|\-}, '::'.freeze)
+    end
   end
 end
